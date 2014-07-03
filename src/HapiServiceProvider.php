@@ -5,14 +5,20 @@ use Dingo\Api\ApiServiceProvider as BaseServiceProvider;
 
 class HapiServiceProvider extends BaseServiceProvider {
 
-	/**
-	 * Indicates if loading of the provider is deferred.
-	 *
-	 * @var bool
-	 */
-	protected $defer = false;
+    /**
+     * Boot the service provider.
+     *
+     * @return void
+     */
+    public function boot()
+    {
+        // make sure we're still booting the dingo/api package
+        parent::boot();
 
-	/**
+        $this->package('edgji/hapi', 'hapi', __DIR__);
+    }
+
+    /**
 	 * Register the service provider.
 	 *
 	 * @return void
@@ -28,7 +34,7 @@ class HapiServiceProvider extends BaseServiceProvider {
         $this->app->booting(function ($app) {
             $router = $app['router'];
 
-            $router->setController('Hapi\\Routing\\Controller');
+            $router->setController($this->app['config']['hapi::controller']);
         });
     }
 
