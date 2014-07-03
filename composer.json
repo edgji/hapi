@@ -1,5 +1,5 @@
 {
-    "name": "edgji/api",
+    "name": "edgji/hapi",
     "description": "Expose RESTful Entity Resources as APIs with this helper class for Laravel based on the Dingo/Api package",
     "authors": [
         {
