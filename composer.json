@@ -13,8 +13,8 @@
         "dingo/api": "0.*"
     },
     "autoload": {
-        "psr-0": {
-            "Edgji\\Hapi": "src/"
+        "psr-4": {
+            "Edgji\\Hapi\\": "src"
         }
     },
     "minimum-stability": "stable"
