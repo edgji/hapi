@@ -7,13 +7,6 @@ class Router extends BaseRouter {
     protected $controller;
 
     /**
-     * The entity parameter patterns.
-     *
-     * @var array
-     */
-    protected $entityPatterns = array();
-
-    /**
      * @param mixed $controller
      */
     public function setController($controller)
@@ -35,35 +28,10 @@ class Router extends BaseRouter {
 
         if ( ! $name)
         {
-            if ($parent) {
-                $name = '{'.$parent.'}/{id}/{'.$model.'}';
-                $this->entityPattern($parent);
-            }
-            else
-            {
-                $name = '{'.$model.'}';
-            }
-            $this->entityPattern($model);
+            $name = ($parent) ? str_plural($parent).'/{id}/'.str_plural($model) : str_plural($model);
         }
-
-        //$routeKey = $this->routes->count();
 
         $controller = array_pull($options, 'controller', $this->controller);
         $this->resource($name, $controller, $options);
-
-        //$routes = $this->routes->getRoutes();
-        //$count = count($routes);
-        //
-        //while($routeKey < $count)
-        //{
-        //    $route = $routes[$routeKey++];
-        //    $route->where($this->entityPatterns);
-        //}
-    }
-
-    protected function entityPattern($key)
-    {
-        $entity = str_plural($key);
-        $this->entityPatterns[$key] = "({$entity})";
     }
 }
