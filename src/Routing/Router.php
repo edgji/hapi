@@ -9,7 +9,9 @@ class Router extends BaseRouter {
      *
      * @var bool
      */
-    public static $snakePaths = true;
+    protected static $snakePaths = true;
+
+    protected static $snakeDelimiter = '-';
 
     protected $controller;
 
@@ -36,12 +38,16 @@ class Router extends BaseRouter {
 
         if ( ! $name)
         {
-            $model = (static::$snakePaths) ? snake_case(str_plural($model), '-') : str_plural(strtolower($model));
-
             // nest resource routes if parent is present
             if ($parent)
             {
-                $parent = (static::$snakePaths) ? snake_case(str_plural($parent), '-') : str_plural(strtolower($parent));
+                // conventionally we should avoid being repetitive
+                // nested model routes should not reference parents
+                if (strpos($model, $parent) === 0)
+                    $model = substr($model, strlen($parent));
+
+                $model = static::prepareEntityBaseName($model);
+                $parent = static::prepareEntityBaseName($parent);
 
                 $only = array_pull($options, 'only', false);
                 $except = array_pull($options, 'except', []);
@@ -52,9 +58,8 @@ class Router extends BaseRouter {
                 if ($addIndexAction)
                 {
                     $name = $parent . '.' . $model;
-                    $base = $model;
 
-                    $this->addResourceIndex($name, $base, $controller, $options);
+                    $this->addResourceIndex($name, $model, $controller, $options);
                     // make sure we skip the index action when we call the resource method
                     $options['except'] =  array_merge($except, ['index']);
                 }
@@ -64,10 +69,23 @@ class Router extends BaseRouter {
             }
             else
             {
+                $model = static::prepareEntityBaseName($model);
                 $name = $model;
             }
         }
 
+        // hand off to default resource router
         $this->resource($name, $controller, $options);
+    }
+
+    /**
+     * Resolve a model name route based on simple convention.
+     *
+     * @param  string  $entity
+     * @return string
+     */
+    protected static function prepareEntityBaseName($entity)
+    {
+        return (static::$snakePaths) ? snake_case(str_plural($entity), static::$snakeDelimiter) : str_plural(strtolower($entity));
     }
 }
