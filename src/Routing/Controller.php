@@ -1,7 +1,8 @@
 <?php namespace Edgji\Hapi\Routing;
 
-use Dingo\Api\Auth\Shield;
 use Dingo\Api\Dispatcher;
+use Dingo\Api\Auth\Shield;
+use Dingo\Api\Http\ResponseBuilder;
 use Dingo\Api\Routing\Controller as BaseController;
 
 use Illuminate\Support\Facades\App;
@@ -11,19 +12,35 @@ class Controller extends BaseController {
     protected $model;
     protected $parent;
 
-    public function __construct(Dispatcher $api, Shield $auth)
+    /**
+     * Create a new controller instance.
+     *
+     * @param  \Dingo\Api\Dispatcher  $api
+     * @param  \Dingo\Api\Auth\Shield  $auth
+     * @param  \Dingo\Api\Http\ResponseBuilder  $response
+     * @return void
+     */
+    public function __construct(Dispatcher $api, Shield $auth, ResponseBuilder $response)
     {
-        parent::__construct($api, $auth);
+        parent::__construct($api, $auth, $response);
 
-        $this->beforeFilter('@resolvingFilter');
+        $this->_registerModelResolvers();
     }
 
-    public function resolvingFilter($route, $request)
+    protected function _registerModelResolvers()
     {
-        $this->resolveModelsFilter($route, $request);
+        // TODO find a better way to resolve the filterer since this seems hacky
+        self::setFilterer(app()->router);
+
+        $me = $this;
+
+        $this->beforeFilter(function($route, $request) use ($me)
+        {
+            $me->_resolveModels($route, $request);
+        });
     }
 
-    protected function resolveModelsFilter($route, $request)
+    protected function _resolveModels($route, $request)
     {
         $segments = $request->segments();
         if (count($segments) < 1)
