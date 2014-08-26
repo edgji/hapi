@@ -43,9 +43,15 @@ class Controller extends BaseController {
     protected function _resolveModels($route, $request)
     {
         $segments = $request->segments();
-        if (count($segments) < 1)
+        if (count($segments) > 2)
         {
-            // todo conditional logic to resolve nested models
+            $model = str_singular(array_pop($segments));
+            do {
+                $parent = array_pop($segments);
+            } while (is_numeric($parent));
+            $parent = str_singular(studly_case($parent));
+            $this->model = App::make(str_singular(studly_case($parent.'-'.$model)));
+            $this->parent = App::make($parent);
         }
         else
         {
